@@ -79,3 +79,25 @@ def test_upload_voice_model_flattens_nested_zip_model_files(
     assert (model_dir / "Voice.pth").is_file()
     assert (model_dir / "Voice.index").is_file()
     assert not (model_dir / "nested").exists()
+
+
+def test_upload_voice_model_reports_zip_extraction_progress(
+    tmp_path: Path,
+    mocker: pytest_mock.MockerFixture,
+) -> None:
+    """Report extraction progress so the web UI does not look stuck."""
+    voice_models_dir = tmp_path / "voice_models"
+    _patch_voice_model_dir(mocker, voice_models_dir)
+    archive_path = tmp_path / "singer.zip"
+    _write_archive(archive_path, {"Singer.pth": b"p" * MODEL_BYTES})
+    progress: list[tuple[float, str]] = []
+
+    upload_voice_model(
+        [str(archive_path)],
+        "Singer",
+        progress_callback=lambda value, message: progress.append((value, message)),
+    )
+
+    assert progress
+    assert progress[-1][0] == 1.0
+    assert "Распаковываю" in progress[-1][1]

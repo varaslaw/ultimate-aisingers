@@ -202,30 +202,31 @@ def _render_upload_tab(event_state: ManageModelEventState) -> None:
                     " (например, в logs/[name])",
                 )
                 gr.Markdown(
-                    "2. Загрузите файлы напрямую или сложите их в папку, затем"
-                    " заархивируйте и загрузите zip",
+                    "2. Загрузите ZIP-архив или файлы .pth + .index напрямую.",
                 )
                 gr.Markdown("3. Введите уникальное имя для модели")
                 gr.Markdown("4. Нажмите «Загрузить»")
 
             with gr.Row():
                 voice_model_files = gr.File(
-                    label="Файлы",
+                    label="ZIP-архив или файлы модели",
                     file_count="multiple",
                     file_types=[".zip", ".pth", ".index"],
+                    type="filepath",
+                    info="Для ZIP показывается ход распаковки. Большие модели загружаются из браузера несколько минут.",
                 )
 
                 local_voice_model_name = gr.Textbox(label="Имя модели")
 
             with gr.Row(equal_height=True):
-                upload_voice_btn = gr.Button("Загрузить", variant="primary", scale=19)
+                upload_voice_btn = gr.Button("Загрузить модель", variant="primary", scale=19)
                 upload_voice_msg = gr.Textbox(
                     label="Сообщение",
                     interactive=False,
                     scale=20,
                 )
                 event_state.upload_voice_click.instance = upload_voice_btn.click(
-                    exception_harness(upload_voice_model),
+                    _upload_voice_model_with_progress,
                     inputs=[voice_model_files, local_voice_model_name],
                     outputs=upload_voice_msg,
                 ).success(
@@ -279,6 +280,26 @@ def _render_upload_tab(event_state: ManageModelEventState) -> None:
                     outputs=upload_embedder_msg,
                     show_progress="hidden",
                 )
+
+
+def _upload_voice_model_with_progress(
+    files: Sequence[str],
+    name: str,
+    progress: gr.Progress = gr.Progress(track_tqdm=False),
+) -> None:
+    """Upload a voice model and show ZIP extraction progress in Gradio."""
+
+    progress(0.02, desc="Проверяю файлы модели…")
+
+    def update_progress(value: float, desc: str) -> None:
+        progress(0.08 + value * 0.9, desc=desc)
+
+    exception_harness(upload_voice_model)(
+        files,
+        name,
+        progress_callback=update_progress,
+    )
+    progress(1.0, desc="Модель готова")
 
 
 def _render_delete_tab(

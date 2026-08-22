@@ -12,7 +12,6 @@ from __future__ import annotations
 from typing import Annotated
 
 import os
-from pathlib import Path
 
 import gradio as gr
 
@@ -168,18 +167,39 @@ def render_app() -> gr.Blocks:
         color: var(--ais-text) !important;
         font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
-    .gradio-container .prose, .gradio-container label, .gradio-container .wrap { color: var(--ais-text) !important; }
+    .gradio-container .main { max-width: 1480px !important; padding: 0 24px 42px !important; }
+    .gradio-container .prose, .gradio-container label, .gradio-container .wrap,
+    .gradio-container .block-title, .gradio-container .label-wrap,
+    .gradio-container .label-wrap span, .gradio-container .accordion .label-wrap span,
+    .gradio-container .accordion .label-wrap button, .gradio-container .info,
+    .gradio-container .description, .gradio-container .description p,
+    .gradio-container .prose p, .gradio-container .prose strong {
+        color: var(--ais-text) !important;
+    }
+    .gradio-container .info, .gradio-container .description, .gradio-container .description p {
+        color: var(--ais-muted) !important;
+    }
     .gradio-container .block, .gradio-container .form, .gradio-container .panel {
         border-color: var(--ais-border) !important;
     }
-    .gradio-container .form, .gradio-container .block.gr-box, .gradio-container .accordion {
+    .gradio-container .form, .gradio-container .block.gr-box, .gradio-container .accordion,
+    .gradio-container .group, .gradio-container .block {
         background: var(--ais-surface) !important;
-        border-radius: 16px !important;
+        border-radius: 18px !important;
     }
-    .gradio-container input, .gradio-container textarea, .gradio-container .wrap-inner {
+    .gradio-container input, .gradio-container textarea, .gradio-container .wrap-inner,
+    .gradio-container .wrap, .gradio-container .block input,
+    .gradio-container .block textarea {
         background: var(--ais-input) !important;
         color: var(--ais-text) !important;
         border-color: var(--ais-border) !important;
+        border-radius: 12px !important;
+    }
+    .gradio-container .accordion > .label-wrap { padding: 12px 16px !important; }
+    .gradio-container .accordion > .label-wrap span { font-weight: 700 !important; }
+    .gradio-container .checkbox-group label, .gradio-container .radio-group label,
+    .gradio-container .gradio-radio label, .gradio-container .gradio-checkbox label {
+        border-radius: 12px !important;
     }
     .gradio-container input, .gradio-container textarea { caret-color: var(--ais-mint); }
     .gradio-container .tab-nav { gap: 8px; border: 0 !important; margin: 0 0 20px; }
@@ -205,7 +225,7 @@ def render_app() -> gr.Blocks:
     .ais-hero h1 { margin: 8px 0; color: var(--ais-text) !important; font-size: clamp(2rem, 5vw, 3.6rem); line-height: 1; letter-spacing: -.055em; }
     .ais-hero p { max-width: 650px; margin: 0; color: var(--ais-muted); font-size: 1rem; }
     .ais-status { padding: 9px 12px; white-space: nowrap; border: 1px solid rgba(94, 234, 212, .24); border-radius: 999px; color: var(--ais-mint); font-size: .85rem; }
-    #theme-bar { margin: -14px 0 20px; align-items: center; }
+    #theme-bar { margin: 0 0 20px; align-items: center; min-height: 42px; }
     #theme-selector { margin-left: auto; max-width: 230px; }
     #theme-selector label { color: var(--ais-muted) !important; font-size: .86rem; }
     #theme-selector .wrap { background: transparent !important; border: 0 !important; }
@@ -231,7 +251,10 @@ def render_app() -> gr.Blocks:
     """
     with gr.Blocks(
         title="AISingers",
-        theme=gr.Theme.load(str(Path(__file__).parent / "config/theme.json")),
+        # The bundled theme is intentionally neutral; all visual tokens are
+        # defined above so the dark/light switch does not inherit the former
+        # pink theme's low-contrast text colours.
+        theme=gr.themes.Base(),
         css=css,
         delete_cache=(cache_delete_frequency, cache_delete_cutoff),
     ) as app:
@@ -307,12 +330,12 @@ def render_app() -> gr.Blocks:
             with gr.Tab("Озвучка"):
                 render_speech_one_click_tab(total_config)
                 render_speech_multi_step_tab(total_config)
-        with gr.Tab("Библиотека моделей", elem_id="manage-tab"):
+        with gr.Tab("Загрузить модель", elem_id="manage-tab"):
             gr.HTML(
                 """
                 <div class="ais-section-title">
-                  <h2>Голоса и эмбеддеры</h2>
-                  <p>Скачивайте, добавляйте и очищайте модели. Новые голоса сразу появятся в генераторе.</p>
+                  <h2>Загрузить модель</h2>
+                  <p>Добавьте голос в формате ZIP или файлами .pth + .index. После загрузки он сразу появится в генераторе.</p>
                 </div>
                 """,
             )

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 import lazy_loader as lazy
 
@@ -232,6 +232,7 @@ def _extract_voice_model(
     extraction_dir: StrPath,
     remove_incomplete: bool = True,
     remove_zip: bool = False,
+    progress_callback: Callable[[float, str], None] | None = None,
 ) -> None:
     """
     Extract a zipped voice model to a directory.
@@ -263,11 +264,23 @@ def _extract_voice_model(
         extraction_path.mkdir(parents=True)
         extraction_root = extraction_path.resolve()
         with zipfile.ZipFile(zip_path, "r") as zip_ref:
-            for file_info in zip_ref.infolist():
+            archive_files = [file_info for file_info in zip_ref.infolist() if not file_info.is_dir()]
+            total_size = sum(file_info.file_size for file_info in archive_files) or 1
+            extracted_size = 0
+            for file_info in archive_files:
                 target_path = (extraction_path / file_info.filename).resolve()
                 if not target_path.is_relative_to(extraction_root):
                     raise ValueError("Unsafe path inside model archive.")
-            zip_ref.extractall(extraction_path)
+                target_path.parent.mkdir(parents=True, exist_ok=True)
+                with zip_ref.open(file_info) as source, target_path.open("wb") as target:
+                    while chunk := source.read(DOWNLOAD_CHUNK_SIZE):
+                        target.write(chunk)
+                        extracted_size += len(chunk)
+                        if progress_callback:
+                            progress_callback(
+                                min(extracted_size / total_size, 1.0),
+                                f"Распаковываю: {file_info.filename}",
+                            )
         file_candidates: dict[str, list[Path]] = {".index": [], ".pth": []}
         for path in extraction_path.rglob("*"):
             suffix = path.suffix.lower()
@@ -574,7 +587,11 @@ def download_pretrained_model(name: str, sample_rate: TrainingSampleRate) -> Non
                 raise PretrainedModelNotAvailableError(name, sample_rate) from e
 
 
-def upload_voice_model(files: Sequence[StrPath], name: str) -> None:
+def upload_voice_model(
+    files: Sequence[StrPath],
+    name: str,
+    progress_callback: Callable[[float, str], None] | None = None,
+) -> None:
     """
     Upload a voice model from either a zip file or a .pth file and an
     optional index file.
@@ -610,7 +627,11 @@ def upload_voice_model(files: Sequence[StrPath], name: str) -> None:
                 copy_files_to_new_dir([file_path], model_dir_path)
             # NOTE a .pth file is actually itself a zip file
             elif zipfile.is_zipfile(file_path):
-                _extract_voice_model(file_path, model_dir_path)
+                _extract_voice_model(
+                    file_path,
+                    model_dir_path,
+                    progress_callback=progress_callback,
+                )
             else:
                 raise UploadTypeError(
                     entity=Entity.FILES,

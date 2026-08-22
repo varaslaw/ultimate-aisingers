@@ -21,6 +21,17 @@ VOICE_TEMPLATE_FIELDS = (
 )
 
 VOICE_TEMPLATES: dict[str, dict[str, Any]] = {
+    "Лучшее звучание": {
+        "f0_method": F0Method.RMVPE,
+        "index_rate": 0.4,
+        "rms_mix_rate": 1.0,
+        "protect_rate": 0.33,
+        "split_voice": True,
+        "autotune_voice": False,
+        "autotune_strength": 1.0,
+        "clean_voice": True,
+        "clean_strength": 0.45,
+    },
     "Натуральный вокал": {
         "f0_method": F0Method.RMVPE,
         "index_rate": 0.35,
