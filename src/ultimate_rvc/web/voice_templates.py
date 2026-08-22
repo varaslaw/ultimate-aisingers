@@ -67,8 +67,20 @@ VOICE_TEMPLATES: dict[str, dict[str, Any]] = {
     },
 }
 
+PITCH_TEMPLATES = {
+    "Оригинальная тональность": (0, 0),
+    "Выше на октаву": (1, 0),
+    "Ниже на октаву": (-1, 0),
+}
+
 
 def apply_voice_template(template: str) -> list[dict[str, Any]]:
     """Return Gradio updates for the RVC controls in a voice template."""
     settings = VOICE_TEMPLATES[template]
     return [gr.update(value=settings[field]) for field in VOICE_TEMPLATE_FIELDS]
+
+
+def apply_pitch_template(template: str) -> list[dict[str, int]]:
+    """Return updates for the octave and semitone controls of a pitch template."""
+    octaves, semitones = PITCH_TEMPLATES[template]
+    return [gr.update(value=octaves), gr.update(value=semitones)]

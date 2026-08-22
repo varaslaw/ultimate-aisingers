@@ -28,7 +28,12 @@ from ultimate_rvc.web.common import (
     update_value,
 )
 from ultimate_rvc.web.typing_extra import ConcurrencyId
-from ultimate_rvc.web.voice_templates import VOICE_TEMPLATES, apply_voice_template
+from ultimate_rvc.web.voice_templates import (
+    PITCH_TEMPLATES,
+    VOICE_TEMPLATES,
+    apply_pitch_template,
+    apply_voice_template,
+)
 
 if TYPE_CHECKING:
     from ultimate_rvc.web.config.main import OneClickSpeechGenerationConfig, TotalConfig
@@ -66,15 +71,22 @@ def render(total_config: TotalConfig) -> None:
                 "Для быстрой проверки используйте FCPE-предпросмотр."
             ),
         )
-        with gr.Accordion("Точная настройка речи", open=False):
-            gr.Markdown(
-                "Базовые значения подходят для большинства голосов. Откройте "
-                "раздел, если нужен другой характер звучания."
-            )
-            _render_tts_options(tab_config)
-            _render_conversion_options(tab_config)
-            _render_output_options(tab_config)
-            _render_intermediate_audio(tab_config)
+        pitch_template = gr.Radio(
+            choices=list(PITCH_TEMPLATES),
+            value="Оригинальная тональность",
+            label="Высота результата",
+            info="Высоту можно уточнить вручную в расширенных настройках.",
+        )
+        manual_settings = gr.Checkbox(
+            label="Тонкая настройка — открыть все ручные параметры",
+            value=False,
+        )
+        with gr.Column(visible=False) as advanced_settings:
+            with gr.Accordion("Ручные параметры речи", open=True):
+                _render_tts_options(tab_config)
+                _render_conversion_options(tab_config)
+                _render_output_options(tab_config)
+                _render_intermediate_audio(tab_config)
 
         sound_template.input(
             apply_voice_template,
@@ -90,6 +102,18 @@ def render(total_config: TotalConfig) -> None:
                 tab_config.clean_voice.instance,
                 tab_config.clean_strength.instance,
             ],
+            show_progress="hidden",
+        )
+        pitch_template.input(
+            apply_pitch_template,
+            inputs=pitch_template,
+            outputs=[tab_config.n_octaves.instance, tab_config.n_semitones.instance],
+            show_progress="hidden",
+        )
+        manual_settings.change(
+            partial(toggle_visibility, targets={True}),
+            inputs=manual_settings,
+            outputs=advanced_settings,
             show_progress="hidden",
         )
 
