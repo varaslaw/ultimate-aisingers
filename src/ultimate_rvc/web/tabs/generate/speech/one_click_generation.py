@@ -64,11 +64,11 @@ def render(total_config: TotalConfig) -> None:
             _render_input(tab_config)
         sound_template = gr.Radio(
             choices=list(VOICE_TEMPLATES),
-            value="Натуральный вокал",
+            value="Лучшее звучание",
             label="Шаблон звучания голоса",
             info=(
-                "Шаблон меняет параметры RVC, а не исходный голос Edge TTS. "
-                "Для быстрой проверки используйте FCPE-предпросмотр."
+                "Сбалансированный старт для чистой речи. Шаблон меняет параметры "
+                "RVC, а не исходный голос Edge TTS."
             ),
         )
         pitch_template = gr.Radio(
@@ -78,7 +78,7 @@ def render(total_config: TotalConfig) -> None:
             info="Высоту можно уточнить вручную в расширенных настройках.",
         )
         manual_settings = gr.Checkbox(
-            label="Тонкая настройка — открыть все ручные параметры",
+            label="Расширенные настройки — открыть ручные параметры",
             value=False,
         )
         with gr.Column(visible=False) as advanced_settings:

@@ -75,11 +75,12 @@ def render(total_config: TotalConfig, cookiefile: str | None = None) -> None:
             _render_input(tab_config)
         sound_template = gr.Radio(
             choices=list(VOICE_TEMPLATES),
-            value="Натуральный вокал",
+            value="Лучшее звучание",
             label="Шаблон звучания",
             info=(
-                "Стартовая точка для конкретной модели. Если появляются артефакты, "
-                "начните с «Чистый сложный вокал»."
+                "Сбалансированный старт для финального кавера: точное извлечение "
+                "высоты, чистка и защита согласных. Для проблемного исходника "
+                "выберите «Чистый сложный вокал»."
             ),
         )
         pitch_template = gr.Radio(
@@ -89,7 +90,7 @@ def render(total_config: TotalConfig, cookiefile: str | None = None) -> None:
             info="Высоту можно уточнить вручную в расширенных настройках.",
         )
         manual_settings = gr.Checkbox(
-            label="Тонкая настройка — открыть все ручные параметры",
+            label="Расширенные настройки — открыть ручные параметры",
             value=False,
         )
         with gr.Column(visible=False) as advanced_settings:
