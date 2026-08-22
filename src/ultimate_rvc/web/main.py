@@ -77,6 +77,45 @@ def render_app() -> gr.Blocks:
         --ais-mint: #5eead4;
         --ais-hero: linear-gradient(120deg, rgba(167, 139, 250, .15), rgba(18, 22, 38, .92) 50%, rgba(45, 212, 191, .08));
     }
+    :root, .gradio-container {
+        --background-fill-primary: #070912 !important;
+        --background-fill-secondary: #0d1322 !important;
+        --body-background-fill: #070912 !important;
+        --body-text-color: #f5f7ff !important;
+        --body-text-color-subdued: #9ba9c7 !important;
+        --block-background-fill: #10182a !important;
+        --block-border-color: #293a5d !important;
+        --block-label-text-color: #e6edff !important;
+        --block-info-text-color: #9ba9c7 !important;
+        --block-title-text-color: #f5f7ff !important;
+        --border-color-primary: #293a5d !important;
+        --border-color-accent: #40577f !important;
+        --color-accent: #a855f7 !important;
+        --color-accent-soft: #27204a !important;
+        --input-background-fill: #080d19 !important;
+        --input-background-fill-focus: #121c31 !important;
+        --input-background-fill-hover: #10182a !important;
+        --input-border-color: #2d4168 !important;
+        --input-border-color-focus: #a855f7 !important;
+        --input-text-color: #f5f7ff !important;
+        --input-placeholder-color: #657493 !important;
+        --panel-background-fill: #10182a !important;
+        --checkbox-label-background-fill: #10182a !important;
+        --checkbox-label-background-fill-hover: #17233b !important;
+        --checkbox-label-background-fill-selected: #261b4a !important;
+        --checkbox-label-border-color: #31476f !important;
+        --checkbox-label-text-color: #dbe7ff !important;
+        --checkbox-label-text-color-selected: #ffffff !important;
+        --button-primary-background-fill: #7c3aed !important;
+        --button-primary-background-fill-hover: #9333ea !important;
+        --button-primary-border-color: #a855f7 !important;
+        --button-primary-text-color: #ffffff !important;
+        --button-secondary-background-fill: #18243b !important;
+        --button-secondary-background-fill-hover: #243454 !important;
+        --button-secondary-border-color: #3a527d !important;
+        --button-secondary-text-color: #e6edff !important;
+        --slider-color: #a855f7 !important;
+    }
     html[data-ais-theme="light"] {
         --ais-bg: #f7f8ff;
         --ais-surface: rgba(255, 255, 255, .88);
@@ -90,6 +129,36 @@ def render_app() -> gr.Blocks:
         --ais-mint: #0f766e;
         --ais-hero: linear-gradient(120deg, rgba(167, 139, 250, .22), rgba(255, 255, 255, .95) 50%, rgba(45, 212, 191, .16));
     }
+    html[data-ais-theme="light"] .gradio-container {
+        --background-fill-primary: #f6f7ff !important;
+        --background-fill-secondary: #edf0ff !important;
+        --body-background-fill: #f6f7ff !important;
+        --body-text-color: #17203b !important;
+        --body-text-color-subdued: #5f6b87 !important;
+        --block-background-fill: #ffffff !important;
+        --block-border-color: #d7ddef !important;
+        --block-label-text-color: #273451 !important;
+        --block-info-text-color: #5f6b87 !important;
+        --block-title-text-color: #17203b !important;
+        --border-color-primary: #d7ddef !important;
+        --border-color-accent: #adb8d5 !important;
+        --input-background-fill: #ffffff !important;
+        --input-background-fill-focus: #ffffff !important;
+        --input-background-fill-hover: #f6f7ff !important;
+        --input-border-color: #bdc7e1 !important;
+        --input-text-color: #17203b !important;
+        --panel-background-fill: #ffffff !important;
+        --checkbox-label-background-fill: #ffffff !important;
+        --checkbox-label-background-fill-hover: #f0edff !important;
+        --checkbox-label-background-fill-selected: #ede9fe !important;
+        --checkbox-label-border-color: #cbd4eb !important;
+        --checkbox-label-text-color: #273451 !important;
+        --checkbox-label-text-color-selected: #4c1d95 !important;
+        --button-secondary-background-fill: #eef1fb !important;
+        --button-secondary-background-fill-hover: #e0e6f6 !important;
+        --button-secondary-border-color: #c5cfe7 !important;
+        --button-secondary-text-color: #273451 !important;
+    }
 
     .gradio-container {
         background:
@@ -99,7 +168,7 @@ def render_app() -> gr.Blocks:
         color: var(--ais-text) !important;
         font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
-    .gradio-container .prose, .gradio-container label, .gradio-container .wrap { color: var(--ais-text); }
+    .gradio-container .prose, .gradio-container label, .gradio-container .wrap { color: var(--ais-text) !important; }
     .gradio-container .block, .gradio-container .form, .gradio-container .panel {
         border-color: var(--ais-border) !important;
     }
@@ -112,6 +181,7 @@ def render_app() -> gr.Blocks:
         color: var(--ais-text) !important;
         border-color: var(--ais-border) !important;
     }
+    .gradio-container input, .gradio-container textarea { caret-color: var(--ais-mint); }
     .gradio-container .tab-nav { gap: 8px; border: 0 !important; margin: 0 0 20px; }
     .gradio-container .tab-nav button {
         border: 1px solid transparent !important; border-radius: 12px !important;
@@ -132,12 +202,14 @@ def render_app() -> gr.Blocks:
         background: var(--ais-hero);
     }
     .ais-kicker { color: var(--ais-mint); font-size: .76rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
-    .ais-hero h1 { margin: 8px 0; font-size: clamp(2rem, 5vw, 3.6rem); line-height: 1; letter-spacing: -.055em; }
+    .ais-hero h1 { margin: 8px 0; color: var(--ais-text) !important; font-size: clamp(2rem, 5vw, 3.6rem); line-height: 1; letter-spacing: -.055em; }
     .ais-hero p { max-width: 650px; margin: 0; color: var(--ais-muted); font-size: 1rem; }
     .ais-status { padding: 9px 12px; white-space: nowrap; border: 1px solid rgba(94, 234, 212, .24); border-radius: 999px; color: var(--ais-mint); font-size: .85rem; }
-    #theme-selector { margin: 0 0 18px auto; max-width: 270px; }
+    #theme-bar { margin: -14px 0 20px; align-items: center; }
+    #theme-selector { margin-left: auto; max-width: 230px; }
     #theme-selector label { color: var(--ais-muted) !important; font-size: .86rem; }
-    #theme-selector .wrap { background: var(--ais-surface) !important; border: 1px solid var(--ais-border); border-radius: 12px; }
+    #theme-selector .wrap { background: transparent !important; border: 0 !important; }
+    .gradio-container .theme-toggle label { border-radius: 999px !important; }
     .ais-section-title { margin: 8px 0 16px; }
     .ais-section-title h2 { margin: 0 0 4px; font-size: 1.25rem; }
     .ais-section-title p { margin: 0; color: var(--ais-muted); }
@@ -175,12 +247,16 @@ def render_app() -> gr.Blocks:
             </section>
             """,
         )
-        theme_switch = gr.Radio(
-            choices=["Тёмная", "Светлая"],
-            value="Тёмная",
-            label="Оформление",
-            elem_id="theme-selector",
-        )
+        with gr.Row(elem_id="theme-bar"):
+            gr.HTML("<span class='ais-kicker'>Рабочее пространство</span>")
+            theme_switch = gr.Radio(
+                choices=["Тёмная", "Светлая"],
+                value="Тёмная",
+                label="Оформление",
+                container=False,
+                elem_id="theme-selector",
+                elem_classes=["theme-toggle"],
+            )
         theme_switch.input(
             fn=None,
             inputs=theme_switch,
