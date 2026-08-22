@@ -208,13 +208,17 @@ def _render_upload_tab(event_state: ManageModelEventState) -> None:
                 gr.Markdown("4. Нажмите «Загрузить»")
 
             with gr.Row():
-                voice_model_files = gr.File(
-                    label="ZIP-архив или файлы модели",
-                    file_count="multiple",
-                    file_types=[".zip", ".pth", ".index"],
-                    type="filepath",
-                    info="Для ZIP показывается ход распаковки. Большие модели загружаются из браузера несколько минут.",
-                )
+                with gr.Column():
+                    voice_model_files = gr.File(
+                        label="ZIP-архив или файлы модели",
+                        file_count="multiple",
+                        file_types=[".zip", ".pth", ".index"],
+                        type="filepath",
+                    )
+                    gr.Markdown(
+                        "Для ZIP показывается ход распаковки. Большая модель может "
+                        "загружаться из браузера несколько минут.",
+                    )
 
                 local_voice_model_name = gr.Textbox(label="Имя модели")
 
