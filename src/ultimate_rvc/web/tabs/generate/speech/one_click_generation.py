@@ -20,6 +20,7 @@ from ultimate_rvc.typing_extra import EmbedderModel
 from ultimate_rvc.web.common import (
     PROGRESS_BAR,
     exception_harness,
+    toggle_advanced_settings,
     toggle_intermediate_audio,
     toggle_visibility,
     toggle_visible_component,
@@ -52,6 +53,8 @@ def render(total_config: TotalConfig) -> None:
     """
     tab_config = total_config.speech.one_click
     with gr.Tab("В один клик"):
+        for field, value in VOICE_TEMPLATES["Лучшее звучание"].items():
+            getattr(tab_config, field).value = value
         gr.HTML(
             """
             <div class="ais-section-title">
@@ -67,8 +70,8 @@ def render(total_config: TotalConfig) -> None:
             value="Лучшее звучание",
             label="Шаблон звучания голоса",
             info=(
-                "Сбалансированный старт для чистой речи. Шаблон меняет параметры "
-                "RVC, а не исходный голос Edge TTS."
+                "Ваш мягкий пресет: FCPE и пониженные значения обработки. "
+                "Шаблон меняет параметры RVC, а не исходный голос Edge TTS."
             ),
         )
         pitch_template = gr.Radio(
@@ -77,9 +80,11 @@ def render(total_config: TotalConfig) -> None:
             label="Высота результата",
             info="Высоту можно уточнить вручную в расширенных настройках.",
         )
-        manual_settings = gr.Checkbox(
-            label="Расширенные настройки — открыть ручные параметры",
-            value=False,
+        advanced_open = gr.State(False)
+        manual_settings = gr.Button(
+            "Открыть расширенные настройки ⚙",
+            variant="secondary",
+            elem_classes=["advanced-settings-button"],
         )
         with gr.Column(visible=False) as advanced_settings:
             with gr.Accordion("Ручные параметры речи", open=True):
@@ -110,10 +115,10 @@ def render(total_config: TotalConfig) -> None:
             outputs=[tab_config.n_octaves.instance, tab_config.n_semitones.instance],
             show_progress="hidden",
         )
-        manual_settings.change(
-            partial(toggle_visibility, targets={True}),
-            inputs=manual_settings,
-            outputs=advanced_settings,
+        manual_settings.click(
+            toggle_advanced_settings,
+            inputs=advanced_open,
+            outputs=[advanced_settings, manual_settings, advanced_open],
             show_progress="hidden",
         )
 
@@ -225,6 +230,22 @@ def render(total_config: TotalConfig) -> None:
                 tab_config.output_format.instance,
                 tab_config.output_name.instance,
                 tab_config.show_intermediate_audio.instance,
+            ],
+            show_progress="hidden",
+        ).then(
+            lambda: [
+                "Лучшее звучание",
+                "Оригинальная тональность",
+                False,
+                gr.update(visible=False),
+                gr.update(value="Открыть расширенные настройки ⚙"),
+            ],
+            outputs=[
+                sound_template,
+                pitch_template,
+                advanced_open,
+                advanced_settings,
+                manual_settings,
             ],
             show_progress="hidden",
         )
