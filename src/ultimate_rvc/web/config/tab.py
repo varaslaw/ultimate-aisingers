@@ -390,14 +390,20 @@ class SpeechGenerationConfig(GenerationConfig):
         exclude_value=True,
     )
     source: TextboxConfig = TextboxConfig(
-        label="Источник",
-        info="Текст, который нужно озвучить",
+        label="Текст для озвучки",
+        info="Введите текст вручную или переключитесь на загрузку TXT-файла.",
+        placeholder="Напишите здесь текст, который должен произнести голос…",
+        lines=5,
+        max_lines=12,
         value=None,
         exclude_value=True,
     )
     edge_tts_voice: DropdownConfig = DropdownConfig(
-        label="Голос Edge TTS",
-        info="Выберите голос для синтеза речи через Edge TTS.",
+        label="Голос для исходной речи",
+        info=(
+            "Сначала этот голос прочитает текст, затем выбранная модель RVC "
+            "преобразует его тембр. Начните со Светланы или Дмитрия."
+        ),
         value=None,
         render=False,
         exclude_value=True,
@@ -414,7 +420,7 @@ class SpeechGenerationConfig(GenerationConfig):
         info="Количество полутонов для смещения высоты конвертированной речи.",
     )
     tts_pitch_shift: SliderConfig = SliderConfig(
-        label="Сдвиг высоты Edge TTS",
+        label="Высота исходной TTS-речи",
         info=(
             "На сколько герц смещать высоту речи, созданной Edge TTS, ещё до"
             " конверсии."
@@ -425,7 +431,7 @@ class SpeechGenerationConfig(GenerationConfig):
         step=1,
     )
     tts_speed_change: SliderConfig = SliderConfig(
-        label="Скорость TTS",
+        label="Темп исходной речи",
         info="Изменение скорости речи Edge TTS в процентах.",
         value=0,
         minimum=-50,
@@ -433,7 +439,7 @@ class SpeechGenerationConfig(GenerationConfig):
         step=1,
     )
     tts_volume_change: SliderConfig = SliderConfig(
-        label="Громкость TTS",
+        label="Громкость исходной речи",
         info="Процентное изменение громкости речи, сгенерированной Edge TTS.",
         value=0,
         minimum=-100,

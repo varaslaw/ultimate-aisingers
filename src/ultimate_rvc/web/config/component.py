@@ -571,6 +571,10 @@ class TextboxConfig(InfoComponentConfig[str | None, gr.Textbox]):
     ----------
     placeholder : str | None, default=None
         The placeholder text for the textbox component.
+    lines : int | None, default=None
+        The initial number of visible text lines.
+    max_lines : int | None, default=None
+        The maximum number of visible text lines.
 
     See Also
     --------
@@ -581,6 +585,8 @@ class TextboxConfig(InfoComponentConfig[str | None, gr.Textbox]):
     """
 
     placeholder: str | None = None
+    lines: int | None = None
+    max_lines: int | None = None
 
     def instantiate(
         self,
@@ -608,6 +614,8 @@ class TextboxConfig(InfoComponentConfig[str | None, gr.Textbox]):
             info=self.info,
             value=self.value if value is None else value,
             placeholder=self.placeholder,
+            lines=self.lines,
+            max_lines=self.max_lines,
             visible=self.visible,
             scale=self.scale,
             render=self.render,
