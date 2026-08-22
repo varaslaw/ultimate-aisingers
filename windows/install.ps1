@@ -1,4 +1,4 @@
-. (Join-Path $PSScriptRoot "common.ps1")
+﻿. (Join-Path $PSScriptRoot "common.ps1")
 
 Write-AISingersHeader "УСТАНОВКА"
 
@@ -18,7 +18,7 @@ try {
         }
     }
 
-    $videoCards = Get-NvidiaVideoCards
+    $videoCards = @(Get-NvidiaVideoCards)
     if ($videoCards.Count -gt 0) {
         Write-Host "  NVIDIA: $($videoCards -join ', ')" -ForegroundColor Green
     }

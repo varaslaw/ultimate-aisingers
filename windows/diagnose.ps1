@@ -1,4 +1,4 @@
-. (Join-Path $PSScriptRoot "common.ps1")
+﻿. (Join-Path $PSScriptRoot "common.ps1")
 
 Write-AISingersHeader "ДИАГНОСТИКА"
 
@@ -17,7 +17,7 @@ Add-ReportLine "64-bit: $([Environment]::Is64BitOperatingSystem)"
 Add-ReportLine "Папка: $script:ProjectRoot"
 Add-ReportLine "Свободное место: $(Get-FreeSpaceGb) ГБ"
 
-$videoCards = Get-NvidiaVideoCards
+$videoCards = @(Get-NvidiaVideoCards)
 if ($videoCards.Count -gt 0) {
     Add-ReportLine "NVIDIA: $($videoCards -join ', ')"
 }
