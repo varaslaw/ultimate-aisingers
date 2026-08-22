@@ -11,7 +11,9 @@ from __future__ import annotations
 
 from typing import Annotated
 
+import base64
 import os
+from pathlib import Path
 
 import gradio as gr
 
@@ -62,107 +64,110 @@ def render_app() -> gr.Blocks:
         The rendered web application.
 
     """
+    hero_path = Path(__file__).parent / "assets" / "aisingers-hero.png"
+    hero_image = base64.b64encode(hero_path.read_bytes()).decode("ascii")
+
     css = """
     :root {
-        --ais-bg: #090b14;
-        --ais-surface: rgba(18, 22, 38, .86);
-        --ais-surface-raised: #191f33;
-        --ais-input: rgba(7, 10, 21, .72);
-        --ais-border: rgba(196, 206, 255, .13);
-        --ais-text: #f6f7ff;
-        --ais-muted: #aab2cd;
-        --ais-accent: #a78bfa;
-        --ais-accent-strong: #7c3aed;
-        --ais-mint: #5eead4;
-        --ais-hero: linear-gradient(120deg, rgba(167, 139, 250, .15), rgba(18, 22, 38, .92) 50%, rgba(45, 212, 191, .08));
+        --ais-bg: #0e0b12;
+        --ais-surface: rgba(24, 19, 29, .94);
+        --ais-surface-raised: #211925;
+        --ais-input: #100c14;
+        --ais-border: rgba(226, 181, 206, .16);
+        --ais-text: #fff7fb;
+        --ais-muted: #c8adbc;
+        --ais-accent: #d875a8;
+        --ais-accent-strong: #ad4f7e;
+        --ais-mint: #8bc8bb;
+        --ais-hero: linear-gradient(120deg, #251824, #18121d 58%, #15121b);
     }
     :root, .gradio-container {
-        --background-fill-primary: #070912 !important;
-        --background-fill-secondary: #0d1322 !important;
-        --body-background-fill: #070912 !important;
-        --body-text-color: #f5f7ff !important;
-        --body-text-color-subdued: #9ba9c7 !important;
-        --block-background-fill: #10182a !important;
-        --block-border-color: #293a5d !important;
-        --block-label-text-color: #e6edff !important;
-        --block-info-text-color: #9ba9c7 !important;
-        --block-title-text-color: #f5f7ff !important;
-        --border-color-primary: #293a5d !important;
-        --border-color-accent: #40577f !important;
-        --color-accent: #a855f7 !important;
-        --color-accent-soft: #27204a !important;
-        --input-background-fill: #080d19 !important;
-        --input-background-fill-focus: #121c31 !important;
-        --input-background-fill-hover: #10182a !important;
-        --input-border-color: #2d4168 !important;
-        --input-border-color-focus: #a855f7 !important;
-        --input-text-color: #f5f7ff !important;
-        --input-placeholder-color: #657493 !important;
-        --panel-background-fill: #10182a !important;
-        --checkbox-label-background-fill: #10182a !important;
-        --checkbox-label-background-fill-hover: #17233b !important;
-        --checkbox-label-background-fill-selected: #261b4a !important;
-        --checkbox-label-border-color: #31476f !important;
-        --checkbox-label-text-color: #dbe7ff !important;
+        --background-fill-primary: #0e0b12 !important;
+        --background-fill-secondary: #17111b !important;
+        --body-background-fill: #0e0b12 !important;
+        --body-text-color: #fff7fb !important;
+        --body-text-color-subdued: #c8adbc !important;
+        --block-background-fill: #18131d !important;
+        --block-border-color: #433040 !important;
+        --block-label-text-color: #f8eaf2 !important;
+        --block-info-text-color: #c8adbc !important;
+        --block-title-text-color: #fff7fb !important;
+        --border-color-primary: #433040 !important;
+        --border-color-accent: #765168 !important;
+        --color-accent: #d875a8 !important;
+        --color-accent-soft: #3a2030 !important;
+        --input-background-fill: #100c14 !important;
+        --input-background-fill-focus: #1d1521 !important;
+        --input-background-fill-hover: #1d1621 !important;
+        --input-border-color: #4b3446 !important;
+        --input-border-color-focus: #d875a8 !important;
+        --input-text-color: #fff7fb !important;
+        --input-placeholder-color: #896f7e !important;
+        --panel-background-fill: #18131d !important;
+        --checkbox-label-background-fill: #17121c !important;
+        --checkbox-label-background-fill-hover: #251a27 !important;
+        --checkbox-label-background-fill-selected: #4a2238 !important;
+        --checkbox-label-border-color: #533a4e !important;
+        --checkbox-label-text-color: #f4e3ec !important;
         --checkbox-label-text-color-selected: #ffffff !important;
-        --button-primary-background-fill: #7c3aed !important;
-        --button-primary-background-fill-hover: #9333ea !important;
-        --button-primary-border-color: #a855f7 !important;
+        --button-primary-background-fill: #ad4f7e !important;
+        --button-primary-background-fill-hover: #c15d8d !important;
+        --button-primary-border-color: #d875a8 !important;
         --button-primary-text-color: #ffffff !important;
-        --button-secondary-background-fill: #18243b !important;
-        --button-secondary-background-fill-hover: #243454 !important;
-        --button-secondary-border-color: #3a527d !important;
-        --button-secondary-text-color: #e6edff !important;
-        --slider-color: #a855f7 !important;
+        --button-secondary-background-fill: #251b28 !important;
+        --button-secondary-background-fill-hover: #352436 !important;
+        --button-secondary-border-color: #63445d !important;
+        --button-secondary-text-color: #fff3f8 !important;
+        --slider-color: #d875a8 !important;
     }
     html[data-ais-theme="light"] {
-        --ais-bg: #f7f8ff;
-        --ais-surface: rgba(255, 255, 255, .88);
-        --ais-surface-raised: #ffffff;
-        --ais-input: #ffffff;
-        --ais-border: rgba(59, 70, 120, .16);
-        --ais-text: #19213b;
-        --ais-muted: #5c6682;
-        --ais-accent: #7c3aed;
-        --ais-accent-strong: #6d28d9;
+        --ais-bg: #f4e8ee;
+        --ais-surface: rgba(255, 248, 251, .92);
+        --ais-surface-raised: #fff8fb;
+        --ais-input: #fffafc;
+        --ais-border: rgba(126, 68, 101, .19);
+        --ais-text: #33222d;
+        --ais-muted: #765d6b;
+        --ais-accent: #b94f82;
+        --ais-accent-strong: #963b69;
         --ais-mint: #0f766e;
-        --ais-hero: linear-gradient(120deg, rgba(167, 139, 250, .22), rgba(255, 255, 255, .95) 50%, rgba(45, 212, 191, .16));
+        --ais-hero: linear-gradient(120deg, #efd3df, #faedf3 58%, #eee5f2);
     }
     html[data-ais-theme="light"] .gradio-container {
-        --background-fill-primary: #f6f7ff !important;
-        --background-fill-secondary: #edf0ff !important;
-        --body-background-fill: #f6f7ff !important;
-        --body-text-color: #17203b !important;
-        --body-text-color-subdued: #5f6b87 !important;
-        --block-background-fill: #ffffff !important;
-        --block-border-color: #d7ddef !important;
-        --block-label-text-color: #273451 !important;
-        --block-info-text-color: #5f6b87 !important;
-        --block-title-text-color: #17203b !important;
-        --border-color-primary: #d7ddef !important;
-        --border-color-accent: #adb8d5 !important;
-        --input-background-fill: #ffffff !important;
-        --input-background-fill-focus: #ffffff !important;
-        --input-background-fill-hover: #f6f7ff !important;
-        --input-border-color: #bdc7e1 !important;
-        --input-text-color: #17203b !important;
-        --panel-background-fill: #ffffff !important;
-        --checkbox-label-background-fill: #ffffff !important;
-        --checkbox-label-background-fill-hover: #f0edff !important;
-        --checkbox-label-background-fill-selected: #ede9fe !important;
-        --checkbox-label-border-color: #cbd4eb !important;
-        --checkbox-label-text-color: #273451 !important;
-        --checkbox-label-text-color-selected: #4c1d95 !important;
-        --button-secondary-background-fill: #eef1fb !important;
-        --button-secondary-background-fill-hover: #e0e6f6 !important;
-        --button-secondary-border-color: #c5cfe7 !important;
-        --button-secondary-text-color: #273451 !important;
+        --background-fill-primary: #f4e8ee !important;
+        --background-fill-secondary: #ecdae3 !important;
+        --body-background-fill: #f4e8ee !important;
+        --body-text-color: #33222d !important;
+        --body-text-color-subdued: #765d6b !important;
+        --block-background-fill: #fff8fb !important;
+        --block-border-color: #dbc1ce !important;
+        --block-label-text-color: #48313e !important;
+        --block-info-text-color: #765d6b !important;
+        --block-title-text-color: #33222d !important;
+        --border-color-primary: #dbc1ce !important;
+        --border-color-accent: #c18aa5 !important;
+        --input-background-fill: #fffafc !important;
+        --input-background-fill-focus: #fff5f9 !important;
+        --input-background-fill-hover: #f9edf3 !important;
+        --input-border-color: #d2afc0 !important;
+        --input-text-color: #33222d !important;
+        --panel-background-fill: #fff8fb !important;
+        --checkbox-label-background-fill: #fff8fb !important;
+        --checkbox-label-background-fill-hover: #f8e7ef !important;
+        --checkbox-label-background-fill-selected: #efd2df !important;
+        --checkbox-label-border-color: #d8b6c6 !important;
+        --checkbox-label-text-color: #48313e !important;
+        --checkbox-label-text-color-selected: #702b50 !important;
+        --button-secondary-background-fill: #f6e4ec !important;
+        --button-secondary-background-fill-hover: #efd3df !important;
+        --button-secondary-border-color: #d2a7bb !important;
+        --button-secondary-text-color: #4b2f3e !important;
     }
 
     .gradio-container {
         background:
-            radial-gradient(circle at 16% -10%, rgba(124, 58, 237, .25), transparent 28rem),
-            radial-gradient(circle at 88% 10%, rgba(45, 212, 191, .12), transparent 25rem),
+            radial-gradient(circle at 16% -10%, rgba(173, 79, 126, .18), transparent 28rem),
+            radial-gradient(circle at 88% 10%, rgba(111, 87, 146, .10), transparent 25rem),
             var(--ais-bg) !important;
         color: var(--ais-text) !important;
         font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -201,6 +206,25 @@ def render_app() -> gr.Blocks:
     .gradio-container .gradio-radio label, .gradio-container .gradio-checkbox label {
         border-radius: 12px !important;
     }
+    .gradio-container .wrap:has(input[type="radio"]) {
+        background: transparent !important; border: 0 !important; gap: 8px !important;
+    }
+    .gradio-container label:has(input[type="radio"]) {
+        position: relative; min-height: 44px; padding: 10px 42px 10px 14px !important;
+        border: 1px solid var(--ais-border) !important;
+        background: var(--ais-input) !important; transition: .18s ease;
+    }
+    .gradio-container label:has(input[type="radio"]) input { opacity: 0 !important; position: absolute !important; }
+    .gradio-container label:has(input[type="radio"]:checked) {
+        border-color: var(--ais-accent) !important;
+        background: color-mix(in srgb, var(--ais-accent) 22%, var(--ais-surface)) !important;
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--ais-accent) 18%, transparent);
+    }
+    .gradio-container label:has(input[type="radio"]:checked)::after {
+        content: "✓"; position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+        display: grid; place-items: center; width: 22px; height: 22px; border-radius: 999px;
+        background: var(--ais-accent-strong); color: #fff; font-weight: 900; font-size: 13px;
+    }
     .gradio-container input, .gradio-container textarea { caret-color: var(--ais-mint); }
     .gradio-container .tab-nav { gap: 8px; border: 0 !important; margin: 0 0 20px; }
     .gradio-container .tab-nav button {
@@ -212,19 +236,43 @@ def render_app() -> gr.Blocks:
         border-color: rgba(167, 139, 250, .45) !important; color: var(--ais-text) !important;
     }
     .gradio-container button.primary {
-        background: linear-gradient(135deg, var(--ais-accent-strong), #2563eb) !important;
-        border: 0 !important; box-shadow: 0 12px 28px rgba(124, 58, 237, .28);
+        background: linear-gradient(135deg, var(--ais-accent-strong), #75528f) !important;
+        border: 0 !important; box-shadow: 0 10px 24px rgba(104, 46, 77, .22);
+    }
+    .advanced-settings-button, .advanced-settings-button button {
+        min-height: 58px !important; width: 100% !important; font-size: 1rem !important;
+        font-weight: 800 !important; border: 1px solid var(--ais-accent) !important;
+        border-radius: 15px !important;
+        background: color-mix(in srgb, var(--ais-accent) 15%, var(--ais-surface)) !important;
+        color: var(--ais-text) !important;
+        box-shadow: 0 8px 22px rgba(80, 37, 61, .16) !important;
+    }
+    .advanced-settings-button:hover, .advanced-settings-button button:hover {
+        transform: translateY(-1px); background: color-mix(in srgb, var(--ais-accent) 24%, var(--ais-surface)) !important;
     }
     #aisingers-header { margin: 28px 0 22px; }
     .ais-hero {
-        display: flex; justify-content: space-between; gap: 24px; align-items: end;
-        padding: 30px; border: 1px solid var(--ais-border); border-radius: 22px;
-        background: var(--ais-hero);
+        position: relative; overflow: hidden; min-height: 280px;
+        display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
+        gap: 20px; align-items: center; padding: 32px;
+        border: 1px solid var(--ais-border); border-radius: 26px; background: var(--ais-hero);
     }
+    .ais-hero-copy { position: relative; z-index: 2; }
+    .ais-hero-art { width: 100%; max-height: 265px; object-fit: contain; filter: drop-shadow(0 18px 34px rgba(44, 19, 34, .28)); }
     .ais-kicker { color: var(--ais-mint); font-size: .76rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
     .ais-hero h1 { margin: 8px 0; color: var(--ais-text) !important; font-size: clamp(2rem, 5vw, 3.6rem); line-height: 1; letter-spacing: -.055em; }
     .ais-hero p { max-width: 650px; margin: 0; color: var(--ais-muted); font-size: 1rem; }
-    .ais-status { padding: 9px 12px; white-space: nowrap; border: 1px solid rgba(94, 234, 212, .24); border-radius: 999px; color: var(--ais-mint); font-size: .85rem; }
+    .ais-community { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    .ais-community a {
+        display: flex; align-items: center; gap: 10px; min-width: 220px; padding: 11px 14px;
+        border: 1px solid var(--ais-border); border-radius: 14px;
+        background: color-mix(in srgb, var(--ais-surface) 84%, transparent);
+        color: var(--ais-text) !important; text-decoration: none !important;
+    }
+    .ais-community a:hover { border-color: var(--ais-accent) !important; transform: translateY(-1px); }
+    .ais-community strong { display: block; color: var(--ais-text); font-size: .9rem; }
+    .ais-community small { display: block; color: var(--ais-muted); font-size: .76rem; }
+    .ais-community-icon { font-size: 1.25rem; }
     #theme-bar { margin: 0 0 20px; align-items: center; min-height: 42px; }
     #theme-selector { margin-left: auto; max-width: 230px; }
     #theme-selector label { color: var(--ais-muted) !important; font-size: .86rem; }
@@ -236,7 +284,8 @@ def render_app() -> gr.Blocks:
     #generate-tab-button, #manage-tab-button, #audio-tab-button, #settings-tab-button { font-weight: 750 !important; }
     @media (max-width: 680px) {
         .ais-hero { padding: 22px; display: block; }
-        .ais-status { display: inline-block; margin-top: 18px; }
+        .ais-hero-art { display: none; }
+        .ais-community a { min-width: 100%; }
         .gradio-container .tab-nav { overflow-x: auto; }
     }
     """
@@ -259,14 +308,24 @@ def render_app() -> gr.Blocks:
         delete_cache=(cache_delete_frequency, cache_delete_cutoff),
     ) as app:
         gr.HTML(
-            """
+            f"""
             <section id="aisingers-header" class="ais-hero">
-              <div>
+              <div class="ais-hero-copy">
                 <div class="ais-kicker">AI voice studio</div>
                 <h1>AISingers</h1>
                 <p>Создавайте каверы и речь в понятном рабочем процессе — от источника до готового аудио.</p>
+                <div class="ais-community">
+                  <a href="https://t.me/aisingers" target="_blank" rel="noopener noreferrer">
+                    <span class="ais-community-icon">✦</span>
+                    <span><strong>Наш Telegram-канал</strong><small>Новости и обновления AISingers</small></span>
+                  </a>
+                  <a href="https://t.me/AIsingers_bot" target="_blank" rel="noopener noreferrer">
+                    <span class="ais-community-icon">◉</span>
+                    <span><strong>Создать голосового бота</strong><small>Попробуйте в @AIsingers_bot</small></span>
+                  </a>
+                </div>
               </div>
-              <div class="ais-status">● Локальная студия</div>
+              <img class="ais-hero-art" src="data:image/png;base64,{hero_image}" alt="Микрофон и звуковые волны AISingers" />
             </section>
             """,
         )

@@ -238,6 +238,23 @@ def toggle_visibility(
     return gr.update(**update_args)
 
 
+def toggle_advanced_settings(
+    is_open: bool,
+) -> tuple[dict[str, Any], dict[str, Any], bool]:
+    """Toggle the advanced-settings panel and its visible button label."""
+    should_open = not is_open
+    button_label = (
+        "Скрыть расширенные настройки ↑"
+        if should_open
+        else "Открыть расширенные настройки ⚙"
+    )
+    return (
+        gr.update(visible=should_open),
+        gr.update(value=button_label),
+        should_open,
+    )
+
+
 def toggle_visibilities(
     num_components: int,
     value: T,
