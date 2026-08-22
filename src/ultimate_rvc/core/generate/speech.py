@@ -5,7 +5,7 @@ RVC-based TTS generation.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 import lazy_loader as lazy
 
@@ -64,6 +64,10 @@ else:
 
 logger = logging.getLogger(__name__)
 
+EDGE_TTS_VOICE_CACHE = (
+    Path(__file__).parents[2] / "rvc" / "lib" / "tools" / "tts_voices.json"
+)
+
 
 def list_edge_tts_voices(
     locale: str | None = None,
@@ -115,6 +119,7 @@ def list_edge_tts_voices(
         "FriendlyName",
         "ShortName",
         "Locale",
+        "Gender",
     ]
 
     if include_status_info:
@@ -129,8 +134,14 @@ def list_edge_tts_voices(
     try:
         voices = anyio.run(edge_tts.list_voices)
     except (OSError, aiohttp.ClientError):
-        logger.exception("Failed to fetch Edge TTS voices")
-        return [], all_keys
+        logger.warning(
+            "Failed to fetch current Edge TTS voices; using the bundled catalogue",
+            exc_info=True,
+        )
+        cached_voices = json_load(EDGE_TTS_VOICE_CACHE)
+        if not isinstance(cached_voices, list):
+            return [], all_keys
+        voices = cast(list[dict[str, Any]], cached_voices)
 
     filtered_voices = [
         v

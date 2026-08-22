@@ -33,6 +33,11 @@ from ultimate_rvc.web.common import (
     update_output_name,
     update_value,
 )
+from ultimate_rvc.web.tts import (
+    TTS_STYLE_TEMPLATES,
+    apply_tts_style,
+    render_tts_voice_picker,
+)
 from ultimate_rvc.web.typing_extra import ConcurrencyId, SpeechTransferOption
 
 if TYPE_CHECKING:
@@ -86,19 +91,35 @@ def _render_step_1(total_config: TotalConfig) -> None:
                 outputs=tab_config.source.instance,
                 show_progress="hidden",
             )
-        tab_config.edge_tts_voice.instance.render()
+        render_tts_voice_picker(tab_config)
+        tts_style = gr.Radio(
+            choices=list(TTS_STYLE_TEMPLATES),
+            value="Естественно",
+            label="Стиль исходной речи TTS",
+            info="Настройте характер исходной речи до конверсии через RVC.",
+        )
         with gr.Accordion("Настройки", open=False):
             with gr.Row():
                 tab_config.tts_pitch_shift.instantiate()
                 tab_config.tts_speed_change.instantiate()
                 tab_config.tts_volume_change.instantiate()
+            tts_style.input(
+                apply_tts_style,
+                inputs=tts_style,
+                outputs=[
+                    tab_config.tts_pitch_shift.instance,
+                    tab_config.tts_speed_change.instance,
+                    tab_config.tts_volume_change.instance,
+                ],
+                show_progress="hidden",
+            )
             speech_transfer = _render_speech_transfer(
                 [SpeechTransferOption.STEP_2_SPEECH],
                 "Речь",
             )
         with gr.Row():
             tts_reset_btn = gr.Button("Сбросить настройки")
-            tts_btn = gr.Button("Преобразовать текст", variant="primary")
+            tts_btn = gr.Button("Создать TTS-речь", variant="primary")
         tts_transfer_btn = gr.Button("Передать речь")
 
         speech_track_output = gr.Audio(
@@ -109,12 +130,14 @@ def _render_step_1(total_config: TotalConfig) -> None:
         )
         tts_reset_btn.click(
             lambda: [
+                "Естественно",
                 tab_config.tts_pitch_shift.value,
                 tab_config.tts_speed_change.value,
                 tab_config.tts_volume_change.value,
                 gr.Dropdown(value=[SpeechTransferOption.STEP_2_SPEECH]),
             ],
             outputs=[
+                tts_style,
                 tab_config.tts_pitch_shift.instance,
                 tab_config.tts_speed_change.instance,
                 tab_config.tts_volume_change.instance,

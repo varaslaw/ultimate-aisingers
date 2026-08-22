@@ -407,7 +407,11 @@ def initialize_dropdowns(
         )
         raise ValueError(err_msg)
     updated_choices = fn(*args, **kwargs)
-    if value is None or value not in updated_choices:
+    available_values = [
+        choice[1] if isinstance(choice, tuple) else choice
+        for choice in updated_choices
+    ]
+    if value is None or value not in available_values:
         value = next(iter(updated_choices), None)
         if isinstance(value, tuple):
             value = value[1]

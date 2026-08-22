@@ -21,7 +21,6 @@ import typer
 
 from ultimate_rvc.common import AUDIO_DIR, MODELS_DIR, TEMP_DIR
 from ultimate_rvc.core.generate.song_cover import get_named_song_dirs
-from ultimate_rvc.core.generate.speech import get_edge_tts_voice_names
 from ultimate_rvc.core.manage.audio import (
     get_saved_output_audio,
     get_saved_speech_audio,
@@ -48,6 +47,7 @@ from ultimate_rvc.web.tabs.generate.speech.one_click_generation import (
 from ultimate_rvc.web.tabs.manage.audio import render as render_audio_tab
 from ultimate_rvc.web.tabs.manage.models import render as render_models_tab
 from ultimate_rvc.web.tabs.manage.settings import render as render_settings_tab
+from ultimate_rvc.web.tts import get_edge_tts_voice_choices
 
 config_name = os.environ.get("URVC_CONFIG")
 cookiefile = os.environ.get("YT_COOKIEFILE")
@@ -281,6 +281,15 @@ def render_app() -> gr.Blocks:
     .ais-section-title { margin: 8px 0 16px; }
     .ais-section-title h2 { margin: 0 0 4px; font-size: 1.25rem; }
     .ais-section-title p { margin: 0; color: var(--ais-muted); }
+    .tts-voice-picker {
+        padding: 18px !important; border: 1px solid color-mix(in srgb, var(--ais-accent) 42%, var(--ais-border)) !important;
+        border-radius: 18px !important;
+        background: linear-gradient(135deg, color-mix(in srgb, var(--ais-accent) 10%, var(--ais-surface)), var(--ais-surface)) !important;
+    }
+    .tts-picker-heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; margin-bottom: 12px; }
+    .tts-picker-heading strong { color: var(--ais-text); font-size: 1rem; }
+    .tts-picker-heading span, .tts-picker-note { color: var(--ais-muted); font-size: .82rem; }
+    .tts-picker-note { margin-top: 8px; line-height: 1.5; }
     #generate-tab-button, #manage-tab-button, #audio-tab-button, #settings-tab-button { font-weight: 750 !important; }
     @media (max-width: 680px) {
         .ais-hero { padding: 22px; display: block; }
@@ -386,7 +395,7 @@ def render_app() -> gr.Blocks:
             with gr.Tab("Каверы"):
                 render_song_cover_one_click_tab(total_config, cookiefile)
                 render_song_cover_multi_step_tab(total_config, cookiefile)
-            with gr.Tab("Озвучка"):
+            with gr.Tab("Озвучка TTS"):
                 render_speech_one_click_tab(total_config)
                 render_speech_multi_step_tab(total_config)
         with gr.Tab("Загрузить модель", elem_id="manage-tab"):
@@ -467,9 +476,9 @@ def _init_dropdowns() -> list[gr.Dropdown]:
     """
     # Initialize model dropdowns
     edge_tts_models = initialize_dropdowns(
-        get_edge_tts_voice_names,
+        get_edge_tts_voice_choices,
         2,
-        "en-US-ChristopherNeural",
+        "ru-RU-SvetlanaNeural",
         range(2),
     )
     voice_models = initialize_dropdowns(

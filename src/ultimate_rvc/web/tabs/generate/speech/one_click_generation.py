@@ -28,6 +28,11 @@ from ultimate_rvc.web.common import (
     update_output_name,
     update_value,
 )
+from ultimate_rvc.web.tts import (
+    TTS_STYLE_TEMPLATES,
+    apply_tts_style,
+    render_tts_voice_picker,
+)
 from ultimate_rvc.web.typing_extra import ConcurrencyId
 from ultimate_rvc.web.voice_templates import (
     PITCH_TEMPLATES,
@@ -58,13 +63,22 @@ def render(total_config: TotalConfig) -> None:
         gr.HTML(
             """
             <div class="ais-section-title">
-              <h2>Речь в один клик</h2>
-              <p>Введите текст или загрузите файл, выберите голос — и получите готовую озвучку.</p>
+              <h2>Озвучка TTS в один клик</h2>
+              <p>Введите текст, выберите исходный TTS-голос и голосовую модель RVC.</p>
             </div>
             """,
         )
         with gr.Group():
             _render_input(tab_config)
+        tts_style = gr.Radio(
+            choices=list(TTS_STYLE_TEMPLATES),
+            value="Естественно",
+            label="Стиль исходной речи TTS",
+            info=(
+                "Быстрая настройка темпа, высоты и громкости до обработки "
+                "голосовой моделью."
+            ),
+        )
         sound_template = gr.Radio(
             choices=list(VOICE_TEMPLATES),
             value="Лучшее звучание",
@@ -115,6 +129,16 @@ def render(total_config: TotalConfig) -> None:
             outputs=[tab_config.n_octaves.instance, tab_config.n_semitones.instance],
             show_progress="hidden",
         )
+        tts_style.input(
+            apply_tts_style,
+            inputs=tts_style,
+            outputs=[
+                tab_config.tts_pitch_shift.instance,
+                tab_config.tts_speed_change.instance,
+                tab_config.tts_volume_change.instance,
+            ],
+            show_progress="hidden",
+        )
         manual_settings.click(
             toggle_advanced_settings,
             inputs=advanced_open,
@@ -124,7 +148,11 @@ def render(total_config: TotalConfig) -> None:
 
         with gr.Row(equal_height=True):
             reset_btn = gr.Button(value="Сбросить", scale=1)
-            generate_btn = gr.Button(value="Создать озвучку", scale=3, variant="primary")
+            generate_btn = gr.Button(
+                value="Создать TTS-озвучку",
+                scale=3,
+                variant="primary",
+            )
         mixed_speech = gr.Audio(
             label="Готовая озвучка",
             scale=3,
@@ -234,6 +262,7 @@ def render(total_config: TotalConfig) -> None:
             show_progress="hidden",
         ).then(
             lambda: [
+                "Естественно",
                 "Лучшее звучание",
                 "Оригинальная тональность",
                 False,
@@ -241,6 +270,7 @@ def render(total_config: TotalConfig) -> None:
                 gr.update(value="Открыть расширенные настройки ⚙"),
             ],
             outputs=[
+                tts_style,
                 sound_template,
                 pitch_template,
                 advanced_open,
@@ -276,9 +306,8 @@ def _render_input(tab_config: OneClickSpeechGenerationConfig) -> None:
             outputs=tab_config.source.instance,
             show_progress="hidden",
         )
-    with gr.Row():
-        tab_config.edge_tts_voice.instance.render()
-        tab_config.voice_model.instance.render()
+    render_tts_voice_picker(tab_config)
+    tab_config.voice_model.instance.render()
 
 
 def _render_tts_options(tab_config: OneClickSpeechGenerationConfig) -> None:
