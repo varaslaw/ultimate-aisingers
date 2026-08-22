@@ -108,8 +108,9 @@ class GenerationConfig(BaseTabConfig):
     f0_method: DropdownConfig = DropdownConfig(
         label="Алгоритм извлечения высоты",
         info=(
-            "RMVPE рекомендуем по умолчанию: он быстро и точнее всего извлекает"
-            " высоту для большинства случаев."
+            "RMVPE — надёжный выбор для финального вокала. FCPE — для быстрого"
+            " предпросмотра. CREPE точнее на некоторых сложных партиях, но работает"
+            " медленнее; CREPE Tiny — самый быстрый, но менее устойчивый."
         ),
         value=F0Method.RMVPE,
         choices=list(F0Method),
