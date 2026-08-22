@@ -5,6 +5,7 @@ config/*
 temp/*
 uv/*
 uv.lock
+.runtime/
 !src/ultimate_rvc/rvc/lib/*
 
 # Byte-compiled / optimized / DLL files
