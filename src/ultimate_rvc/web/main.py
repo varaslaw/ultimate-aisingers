@@ -64,23 +64,130 @@ def render_app() -> gr.Blocks:
 
     """
     css = """
-    h1 { text-align: center; margin-top: 20px; margin-bottom: 20px; }
+    :root {
+        --ais-bg: #090b14;
+        --ais-surface: rgba(18, 22, 38, .86);
+        --ais-surface-raised: #191f33;
+        --ais-input: rgba(7, 10, 21, .72);
+        --ais-border: rgba(196, 206, 255, .13);
+        --ais-text: #f6f7ff;
+        --ais-muted: #aab2cd;
+        --ais-accent: #a78bfa;
+        --ais-accent-strong: #7c3aed;
+        --ais-mint: #5eead4;
+        --ais-hero: linear-gradient(120deg, rgba(167, 139, 250, .15), rgba(18, 22, 38, .92) 50%, rgba(45, 212, 191, .08));
+    }
+    html[data-ais-theme="light"] {
+        --ais-bg: #f7f8ff;
+        --ais-surface: rgba(255, 255, 255, .88);
+        --ais-surface-raised: #ffffff;
+        --ais-input: #ffffff;
+        --ais-border: rgba(59, 70, 120, .16);
+        --ais-text: #19213b;
+        --ais-muted: #5c6682;
+        --ais-accent: #7c3aed;
+        --ais-accent-strong: #6d28d9;
+        --ais-mint: #0f766e;
+        --ais-hero: linear-gradient(120deg, rgba(167, 139, 250, .22), rgba(255, 255, 255, .95) 50%, rgba(45, 212, 191, .16));
+    }
 
-    #generate-tab-button { font-weight: bold !important;}
-    #manage-tab-button { font-weight: bold !important;}
-    #audio-tab-button { font-weight: bold !important;}
-    #settings-tab-button { font-weight: bold !important;}
+    .gradio-container {
+        background:
+            radial-gradient(circle at 16% -10%, rgba(124, 58, 237, .25), transparent 28rem),
+            radial-gradient(circle at 88% 10%, rgba(45, 212, 191, .12), transparent 25rem),
+            var(--ais-bg) !important;
+        color: var(--ais-text) !important;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .gradio-container .prose, .gradio-container label, .gradio-container .wrap { color: var(--ais-text); }
+    .gradio-container .block, .gradio-container .form, .gradio-container .panel {
+        border-color: var(--ais-border) !important;
+    }
+    .gradio-container .form, .gradio-container .block.gr-box, .gradio-container .accordion {
+        background: var(--ais-surface) !important;
+        border-radius: 16px !important;
+    }
+    .gradio-container input, .gradio-container textarea, .gradio-container .wrap-inner {
+        background: var(--ais-input) !important;
+        color: var(--ais-text) !important;
+        border-color: var(--ais-border) !important;
+    }
+    .gradio-container .tab-nav { gap: 8px; border: 0 !important; margin: 0 0 20px; }
+    .gradio-container .tab-nav button {
+        border: 1px solid transparent !important; border-radius: 12px !important;
+        color: var(--ais-muted) !important; font-weight: 650 !important; padding: 10px 16px !important;
+    }
+    .gradio-container .tab-nav button.selected {
+        background: rgba(167, 139, 250, .15) !important;
+        border-color: rgba(167, 139, 250, .45) !important; color: var(--ais-text) !important;
+    }
+    .gradio-container button.primary {
+        background: linear-gradient(135deg, var(--ais-accent-strong), #2563eb) !important;
+        border: 0 !important; box-shadow: 0 12px 28px rgba(124, 58, 237, .28);
+    }
+    #aisingers-header { margin: 28px 0 22px; }
+    .ais-hero {
+        display: flex; justify-content: space-between; gap: 24px; align-items: end;
+        padding: 30px; border: 1px solid var(--ais-border); border-radius: 22px;
+        background: var(--ais-hero);
+    }
+    .ais-kicker { color: var(--ais-mint); font-size: .76rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+    .ais-hero h1 { margin: 8px 0; font-size: clamp(2rem, 5vw, 3.6rem); line-height: 1; letter-spacing: -.055em; }
+    .ais-hero p { max-width: 650px; margin: 0; color: var(--ais-muted); font-size: 1rem; }
+    .ais-status { padding: 9px 12px; white-space: nowrap; border: 1px solid rgba(94, 234, 212, .24); border-radius: 999px; color: var(--ais-mint); font-size: .85rem; }
+    #theme-selector { margin: 0 0 18px auto; max-width: 270px; }
+    #theme-selector label { color: var(--ais-muted) !important; font-size: .86rem; }
+    #theme-selector .wrap { background: var(--ais-surface) !important; border: 1px solid var(--ais-border); border-radius: 12px; }
+    .ais-section-title { margin: 8px 0 16px; }
+    .ais-section-title h2 { margin: 0 0 4px; font-size: 1.25rem; }
+    .ais-section-title p { margin: 0; color: var(--ais-muted); }
+    #generate-tab-button, #manage-tab-button, #audio-tab-button, #settings-tab-button { font-weight: 750 !important; }
+    @media (max-width: 680px) {
+        .ais-hero { padding: 22px; display: block; }
+        .ais-status { display: inline-block; margin-top: 18px; }
+        .gradio-container .tab-nav { overflow-x: auto; }
+    }
     """
     cache_delete_frequency = 86400  # every 24 hours check for files to delete
     cache_delete_cutoff = 86400  # and delete files older than 24 hours
 
+    theme_switch_js = """
+    (theme) => {
+        document.documentElement.dataset.aisTheme = theme === "Светлая" ? "light" : "dark";
+        return [];
+    }
+    """
     with gr.Blocks(
         title="AISingers",
         theme=gr.Theme.load(str(Path(__file__).parent / "config/theme.json")),
         css=css,
         delete_cache=(cache_delete_frequency, cache_delete_cutoff),
     ) as app:
-        gr.HTML("<h1>AISingers</h1>")
+        gr.HTML(
+            """
+            <section id="aisingers-header" class="ais-hero">
+              <div>
+                <div class="ais-kicker">AI voice studio</div>
+                <h1>AISingers</h1>
+                <p>Создавайте каверы и речь в понятном рабочем процессе — от источника до готового аудио.</p>
+              </div>
+              <div class="ais-status">● Локальная студия</div>
+            </section>
+            """,
+        )
+        theme_switch = gr.Radio(
+            choices=["Тёмная", "Светлая"],
+            value="Тёмная",
+            label="Оформление",
+            elem_id="theme-selector",
+        )
+        theme_switch.input(
+            fn=None,
+            inputs=theme_switch,
+            outputs=None,
+            js=theme_switch_js,
+            show_progress="hidden",
+        )
         for component_config in [
             total_config.song.one_click.voice_model,
             total_config.song.one_click.cached_song,
@@ -109,18 +216,50 @@ def render_app() -> gr.Blocks:
         ]:
             component_config.instantiate()
         # main tab
-        with gr.Tab("Генерация", elem_id="generate-tab"):
+        with gr.Tab("Создать", elem_id="generate-tab"):
+            gr.HTML(
+                """
+                <div class="ais-section-title">
+                  <h2>Создание</h2>
+                  <p>Быстрый режим — для результата сразу. Режим по шагам — для полного контроля над дорожками.</p>
+                </div>
+                """,
+            )
             with gr.Tab("Каверы"):
                 render_song_cover_one_click_tab(total_config, cookiefile)
                 render_song_cover_multi_step_tab(total_config, cookiefile)
             with gr.Tab("Озвучка"):
                 render_speech_one_click_tab(total_config)
                 render_speech_multi_step_tab(total_config)
-        with gr.Tab("Модели", elem_id="manage-tab"):
+        with gr.Tab("Библиотека моделей", elem_id="manage-tab"):
+            gr.HTML(
+                """
+                <div class="ais-section-title">
+                  <h2>Голоса и эмбеддеры</h2>
+                  <p>Скачивайте, добавляйте и очищайте модели. Новые голоса сразу появятся в генераторе.</p>
+                </div>
+                """,
+            )
             render_models_tab(total_config)
-        with gr.Tab("Аудио", elem_id="audio-tab"):
+        with gr.Tab("Мои файлы", elem_id="audio-tab"):
+            gr.HTML(
+                """
+                <div class="ais-section-title">
+                  <h2>Аудиотека</h2>
+                  <p>Управляйте промежуточными дорожками, озвучкой и готовыми результатами.</p>
+                </div>
+                """,
+            )
             render_audio_tab(total_config)
-        with gr.Tab("Настройки", elem_id="settings-tab"):
+        with gr.Tab("Параметры", elem_id="settings-tab"):
+            gr.HTML(
+                """
+                <div class="ais-section-title">
+                  <h2>Рабочее пространство</h2>
+                  <p>Сохраняйте удачные настройки в конфигурации и очищайте временные файлы при необходимости.</p>
+                </div>
+                """,
+            )
             render_settings_tab(total_config)
 
         app.load(

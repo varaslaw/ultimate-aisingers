@@ -29,6 +29,7 @@ from ultimate_rvc.web.common import (
     update_value,
 )
 from ultimate_rvc.web.typing_extra import ConcurrencyId
+from ultimate_rvc.web.voice_templates import VOICE_TEMPLATES, apply_voice_template
 
 if TYPE_CHECKING:
     from ultimate_rvc.web.config.main import OneClickSongGenerationConfig, TotalConfig
@@ -57,19 +58,58 @@ def render(total_config: TotalConfig, cookiefile: str | None = None) -> None:
     """
     with gr.Tab("В один клик"):
         tab_config = total_config.song.one_click
-        _render_input(tab_config)
-        with gr.Accordion("Настройки", open=False):
+        gr.HTML(
+            """
+            <div class="ais-section-title">
+              <h2>Кавер в один клик</h2>
+              <p>1. Укажите трек &nbsp;→&nbsp; 2. Выберите голос &nbsp;→&nbsp; 3. Нажмите «Создать кавер».</p>
+            </div>
+            """,
+        )
+        with gr.Group():
+            _render_input(tab_config)
+        sound_template = gr.Radio(
+            choices=list(VOICE_TEMPLATES),
+            value="Натуральный вокал",
+            label="Шаблон звучания",
+            info=(
+                "Стартовая точка для конкретной модели. Если появляются артефакты, "
+                "начните с «Чистый сложный вокал»."
+            ),
+        )
+        with gr.Accordion("Точная настройка кавера", open=False):
+            gr.Markdown(
+                "Меняйте параметры, только если хотите отойти от рекомендуемого "
+                "звучания."
+            )
             _render_main_options(tab_config)
             _render_conversion_options(tab_config)
             _render_mixing_options(tab_config)
             _render_output_options(tab_config)
             _render_intermediate_audio(tab_config)
 
+        sound_template.input(
+            apply_voice_template,
+            inputs=sound_template,
+            outputs=[
+                tab_config.f0_method.instance,
+                tab_config.index_rate.instance,
+                tab_config.rms_mix_rate.instance,
+                tab_config.protect_rate.instance,
+                tab_config.split_voice.instance,
+                tab_config.autotune_voice.instance,
+                tab_config.autotune_strength.instance,
+                tab_config.clean_voice.instance,
+                tab_config.clean_strength.instance,
+            ],
+            show_progress="hidden",
+        )
+
         with gr.Row(equal_height=True):
-            reset_btn = gr.Button(value="Сбросить настройки", scale=2)
-            generate_btn = gr.Button("Сгенерировать", scale=2, variant="primary")
+            reset_btn = gr.Button(value="Сбросить", scale=1)
+            generate_btn = gr.Button("Создать кавер", scale=3, variant="primary")
         song_cover = gr.Audio(
-            label="Кавер",
+            label="Готовый кавер",
             scale=3,
             waveform_options=gr.WaveformOptions(show_recording_waveform=False),
         )
@@ -146,6 +186,7 @@ def render(total_config: TotalConfig, cookiefile: str | None = None) -> None:
                 tab_config.clean_voice.value,
                 tab_config.clean_strength.value,
                 tab_config.embedder_model.value,
+                tab_config.custom_embedder_model.value,
                 tab_config.sid.value,
                 tab_config.room_size.value,
                 tab_config.wet_level.value,
@@ -156,6 +197,7 @@ def render(total_config: TotalConfig, cookiefile: str | None = None) -> None:
                 tab_config.backup_gain.value,
                 tab_config.output_sr.value,
                 tab_config.output_format.value,
+                tab_config.output_name.value,
                 tab_config.show_intermediate_audio.value,
             ],
             outputs=[
@@ -173,6 +215,7 @@ def render(total_config: TotalConfig, cookiefile: str | None = None) -> None:
                 tab_config.clean_voice.instance,
                 tab_config.clean_strength.instance,
                 tab_config.embedder_model.instance,
+                tab_config.custom_embedder_model.instance,
                 tab_config.sid.instance,
                 tab_config.room_size.instance,
                 tab_config.wet_level.instance,
@@ -183,6 +226,7 @@ def render(total_config: TotalConfig, cookiefile: str | None = None) -> None:
                 tab_config.backup_gain.instance,
                 tab_config.output_sr.instance,
                 tab_config.output_format.instance,
+                tab_config.output_name.instance,
                 tab_config.show_intermediate_audio.instance,
             ],
             show_progress="hidden",
@@ -196,7 +240,7 @@ def _render_input(tab_config: OneClickSongGenerationConfig) -> None:
         with gr.Column():
             tab_config.source.instantiate()
             local_file = gr.Audio(
-                label="Источник",
+                label="Загрузите аудиофайл",
                 type="filepath",
                 visible=False,
                 waveform_options=gr.WaveformOptions(show_recording_waveform=False),
@@ -231,6 +275,7 @@ def _render_input(tab_config: OneClickSongGenerationConfig) -> None:
 
 
 def _render_main_options(tab_config: OneClickSongGenerationConfig) -> None:
+    gr.Markdown("#### Настройка высоты")
     with gr.Row():
         tab_config.n_octaves.instantiate()
         tab_config.n_semitones.instantiate()
@@ -334,8 +379,10 @@ def _select_reverb_preset(preset: str) -> list[gr.Slider]:
     ]
 
 
+
+
 def _render_output_options(tab_config: OneClickSongGenerationConfig) -> None:
-    with gr.Accordion("Вывод аудио", open=False):
+    with gr.Accordion("Файл и результат", open=False):
         with gr.Row():
             tab_config.output_name.instantiate(
                 value=partial(

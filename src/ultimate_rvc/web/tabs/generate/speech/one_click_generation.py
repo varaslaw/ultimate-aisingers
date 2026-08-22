@@ -28,6 +28,7 @@ from ultimate_rvc.web.common import (
     update_value,
 )
 from ultimate_rvc.web.typing_extra import ConcurrencyId
+from ultimate_rvc.web.voice_templates import VOICE_TEMPLATES, apply_voice_template
 
 if TYPE_CHECKING:
     from ultimate_rvc.web.config.main import OneClickSpeechGenerationConfig, TotalConfig
@@ -46,18 +47,57 @@ def render(total_config: TotalConfig) -> None:
     """
     tab_config = total_config.speech.one_click
     with gr.Tab("В один клик"):
-        _render_input(tab_config)
-        with gr.Accordion("Настройки", open=False):
+        gr.HTML(
+            """
+            <div class="ais-section-title">
+              <h2>Речь в один клик</h2>
+              <p>Введите текст или загрузите файл, выберите голос — и получите готовую озвучку.</p>
+            </div>
+            """,
+        )
+        with gr.Group():
+            _render_input(tab_config)
+        sound_template = gr.Radio(
+            choices=list(VOICE_TEMPLATES),
+            value="Натуральный вокал",
+            label="Шаблон звучания голоса",
+            info=(
+                "Шаблон меняет параметры RVC, а не исходный голос Edge TTS. "
+                "Для быстрой проверки используйте FCPE-предпросмотр."
+            ),
+        )
+        with gr.Accordion("Точная настройка речи", open=False):
+            gr.Markdown(
+                "Базовые значения подходят для большинства голосов. Откройте "
+                "раздел, если нужен другой характер звучания."
+            )
             _render_tts_options(tab_config)
             _render_conversion_options(tab_config)
             _render_output_options(tab_config)
             _render_intermediate_audio(tab_config)
 
+        sound_template.input(
+            apply_voice_template,
+            inputs=sound_template,
+            outputs=[
+                tab_config.f0_method.instance,
+                tab_config.index_rate.instance,
+                tab_config.rms_mix_rate.instance,
+                tab_config.protect_rate.instance,
+                tab_config.split_voice.instance,
+                tab_config.autotune_voice.instance,
+                tab_config.autotune_strength.instance,
+                tab_config.clean_voice.instance,
+                tab_config.clean_strength.instance,
+            ],
+            show_progress="hidden",
+        )
+
         with gr.Row(equal_height=True):
-            reset_btn = gr.Button(value="Сбросить настройки", scale=2)
-            generate_btn = gr.Button(value="Сгенерировать", scale=2, variant="primary")
+            reset_btn = gr.Button(value="Сбросить", scale=1)
+            generate_btn = gr.Button(value="Создать озвучку", scale=3, variant="primary")
         mixed_speech = gr.Audio(
-            label="Сведённая речь",
+            label="Готовая озвучка",
             scale=3,
             waveform_options=gr.WaveformOptions(show_recording_waveform=False),
         )
@@ -128,10 +168,12 @@ def render(total_config: TotalConfig) -> None:
                 tab_config.clean_voice.value,
                 tab_config.clean_strength.value,
                 tab_config.embedder_model.value,
+                tab_config.custom_embedder_model.value,
                 tab_config.sid.value,
                 tab_config.output_gain.value,
                 tab_config.output_sr.value,
                 tab_config.output_format.value,
+                tab_config.output_name.value,
                 tab_config.show_intermediate_audio.value,
             ],
             outputs=[
@@ -152,10 +194,12 @@ def render(total_config: TotalConfig) -> None:
                 tab_config.clean_voice.instance,
                 tab_config.clean_strength.instance,
                 tab_config.embedder_model.instance,
+                tab_config.custom_embedder_model.instance,
                 tab_config.sid.instance,
                 tab_config.output_gain.instance,
                 tab_config.output_sr.instance,
                 tab_config.output_format.instance,
+                tab_config.output_name.instance,
                 tab_config.show_intermediate_audio.instance,
             ],
             show_progress="hidden",
@@ -169,7 +213,7 @@ def _render_input(tab_config: OneClickSpeechGenerationConfig) -> None:
         with gr.Column():
             tab_config.source.instantiate()
             local_file = gr.File(
-                label="Источник",
+                label="Загрузите текстовый файл",
                 file_types=[".txt"],
                 file_count="single",
                 type="filepath",
